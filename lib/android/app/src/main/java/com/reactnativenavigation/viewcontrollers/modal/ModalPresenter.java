@@ -5,11 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.reactnativenavigation.anim.ModalAnimator;
-import com.reactnativenavigation.parse.ModalPresentationStyle;
-import com.reactnativenavigation.parse.Options;
-import com.reactnativenavigation.utils.CommandListener;
-import com.reactnativenavigation.viewcontrollers.ViewController;
+import com.reactnativenavigation.options.ModalPresentationStyle;
+import com.reactnativenavigation.options.Options;
+import com.reactnativenavigation.react.CommandListener;
+import com.reactnativenavigation.viewcontrollers.viewcontroller.ViewController;
 
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -81,7 +80,8 @@ public class ModalPresenter {
     }
 
     private void onShowModalEnd(ViewController toAdd, @Nullable ViewController toRemove, CommandListener listener) {
-        if (toRemove != null && toAdd.options.modal.presentationStyle != ModalPresentationStyle.OverCurrentContext) {
+        toAdd.onViewDidAppear();
+        if (toRemove != null && toAdd.resolveCurrentOptions(defaultOptions).modal.presentationStyle != ModalPresentationStyle.OverCurrentContext) {
             toRemove.detachView();
         }
         listener.onSuccess(toAdd.getId());
@@ -92,7 +92,10 @@ public class ModalPresenter {
             listener.onError("Can not dismiss modal before activity is created");
             return;
         }
-        if (toAdd != null) toAdd.attachView(toAdd == root ? rootLayout : modalsLayout, 0);
+        if (toAdd != null) {
+            toAdd.attachView(toAdd == root ? rootLayout : modalsLayout, 0);
+            toAdd.onViewDidAppear();
+        }
         Options options = toDismiss.resolveCurrentOptions(defaultOptions);
         if (options.animations.dismissModal.enabled.isTrueOrUndefined()) {
             animator.dismiss(toDismiss.getView(), options.animations.dismissModal, new AnimatorListenerAdapter() {
