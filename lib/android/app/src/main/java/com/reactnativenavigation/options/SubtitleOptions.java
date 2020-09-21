@@ -1,5 +1,6 @@
 package com.reactnativenavigation.options;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import androidx.annotation.Nullable;
 
@@ -17,16 +18,20 @@ import com.reactnativenavigation.options.parsers.TypefaceLoader;
 import org.json.JSONObject;
 
 public class SubtitleOptions {
-    public static SubtitleOptions parse(TypefaceLoader typefaceManager, JSONObject json) {
+    public static SubtitleOptions parse(Context context, TypefaceLoader typefaceManager, JSONObject json) {
         final SubtitleOptions options = new SubtitleOptions();
         if (json == null) {
             return options;
         }
 
         options.text = TextParser.parse(json, "text");
-        options.color = ColorParser.parse(json, "color");
+        options.color = ColorParser.parse(context, json, "color");
         options.fontSize = FractionParser.parse(json, "fontSize");
-        options.fontFamily = typefaceManager.getTypeFace(json.optString("fontFamily", ""));
+        options.fontFamily = typefaceManager.getTypeFace(
+                json.optString("fontFamily", ""),
+                json.optString("fontStyle", ""),
+                json.optString("fontWeight", "")
+        );
         options.alignment = Alignment.fromString(TextParser.parse(json, "alignment").get(""));
 
         return options;
